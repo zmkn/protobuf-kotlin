@@ -16,9 +16,6 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "protobuf-kotlin"
-include(":protobuf", "stub")
-project(":protobuf").name = "protobuf"
-project(":stub").name = "stub"
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
 }

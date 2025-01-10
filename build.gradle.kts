@@ -5,66 +5,90 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 plugins {
-    alias(libs.plugins.protobuf) apply false
-    alias(libs.plugins.kotlin.jvm) apply false
-    alias(libs.plugins.shadow) apply false
+    `maven-publish`
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.protobuf)
 }
 
-allprojects {
-    group = "com.ailingqi"
-    version = "1.0.0-SNAPSHOT"
+group = "com.ailingqi"
+version = "1.0.0-SNAPSHOT"
+
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
-subprojects {
-    apply {
-        plugin(rootProject.libs.plugins.kotlin.jvm.get().pluginId)
-        plugin(rootProject.libs.plugins.shadow.get().pluginId)
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(22))
     }
-
-    configure<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension> {
-        jvmToolchain {
-            languageVersion.set(JavaLanguageVersion.of(22))
-        }
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_22)
     }
+}
 
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_22)
-        }
+protobuf {
+    protoc {
+        artifact = libs.protobuf.protoc.get().toString()
     }
-
-    // 声明当前时间
-    val currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
-
-    tasks.withType<Jar> {
-        archiveBaseName.set(project.name)
-        archiveVersion.set("${project.version}.${currentDateTime}")
-    }
-
-    tasks.withType<ShadowJar> {
-        archiveBaseName.set(project.name)
-        archiveClassifier.set("all") // 定义生成的 JAR 分类器名
-        archiveVersion.set("${project.version}.${currentDateTime}")
-
-        dependencies {
-            exclude {
-                it.moduleGroup == "org.jetbrains.kotlin"
-            }
-            exclude {
-                it.moduleGroup == "org.jetbrains.kotlinx"
+    generateProtoTasks {
+        all().forEach {
+            it.builtins {
+                create("kotlin")
             }
         }
     }
 }
 
-tasks.register("build") {
-    // 执行所有子项目的 build 任务
-    dependsOn(gradle.includedBuilds.map { it.task(":build") })
-    dependsOn(subprojects.map { "${it.path}:build" })
+val buildJreleaserDir = layout.buildDirectory.dir("jreleaser").get().asFile
+if (!buildJreleaserDir.exists()) {
+    buildJreleaserDir.mkdirs()
 }
 
-tasks.register("clean") {
-    // 执行所有子项目的 clean 任务
-    dependsOn(gradle.includedBuilds.map { it.task(":clean") })
-    dependsOn(subprojects.map { "${it.path}:clean" })
+// 声明当前时间
+val currentDateTime: String = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
+
+tasks.withType<Jar> {
+    archiveBaseName.set(project.name)
+    archiveVersion.set("${project.version}.${currentDateTime}")
+}
+
+tasks.withType<ShadowJar> {
+    archiveBaseName.set(project.name)
+    archiveClassifier.set("all") // 定义生成的 JAR 分类器名
+    archiveVersion.set("${project.version}.${currentDateTime}")
+
+    dependencies {
+        exclude {
+            it.moduleGroup == "org.jetbrains.kotlin"
+        }
+        exclude {
+            it.moduleGroup == "org.jetbrains.kotlinx"
+        }
+    }
+}
+
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+}
+
+tasks.withType<ProcessResources> {
+    filteringCharset = "UTF-8"
+}
+
+tasks.withType<Javadoc> {
+    options.encoding = "UTF-8"
+    (options as StandardJavadocDocletOptions).addBooleanOption("Xdoclint:all,-missing", true)
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
+    }
+}
+
+dependencies {
+    api(libs.protobuf.java.util)
+    api(libs.protobuf.kotlin)
 }
