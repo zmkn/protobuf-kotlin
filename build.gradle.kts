@@ -33,6 +33,7 @@ kotlin {
     }
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_22)
+        freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
     }
 }
 
@@ -477,12 +478,6 @@ tasks.withType<ProcessResources> {
 tasks.withType<Javadoc> {
     options.encoding = "UTF-8"
     (options as StandardJavadocDocletOptions).addBooleanOption("Xdoclint:all,-missing", true)
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    compilerOptions {
-        freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
-    }
 }
 
 dependencies {
