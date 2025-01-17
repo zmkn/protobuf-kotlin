@@ -12,10 +12,6 @@ dependencyResolutionManagement {
     repositories {
         maven {
             url = uri("https://repository.zmkn.com/repository/maven-public/")
-            credentials {
-                username = "repository-reader"
-                password = "HFrGkbj.ouGHj"
-            }
         }
         maven { url = uri("https://jitpack.io") }
         google()
