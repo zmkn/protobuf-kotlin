@@ -53,6 +53,11 @@ protobuf {
     }
 }
 
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor(300, TimeUnit.SECONDS)
+    resolutionStrategy.cacheDynamicVersionsFor(300, TimeUnit.SECONDS)
+}
+
 if (localProperties.getProperty("mavenPublish.enable") == "true") {
     apply {
         plugin("maven-publish")
