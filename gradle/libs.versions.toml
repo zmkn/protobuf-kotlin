@@ -1,9 +1,9 @@
 [versions]
-kotlin = "[2.2,3.0)"
-protobufPlugin = "[0.9.4,1.0)"
-shadow = "[8.3,9.0)"
-jreleaser = "[1.16,2.0)"
-protobuf = "[4.31,5.0)"
+kotlin = "[2.3,3.0)"
+shadow = "[9.3,10.0)"
+jreleaser = "[1.21,2.0)"
+protobufPlugin = "[0.9.5,1.0)"
+protobuf = "[4.33,5.0)"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
